@@ -106,6 +106,8 @@ use core::{
   ptr::*,
 };
 
+extern crate flux_core;
+
 // Used from macros to ensure we aren't using some locally defined name and
 // actually are referencing libcore. This also would allow pre-2018 edition
 // crates to use our macros, but I'm not sure how important that is.
@@ -301,6 +303,7 @@ pub fn bytes_of_mut<T: NoUninit + AnyBitPattern>(t: &mut T) -> &mut [u8] {
 /// This is like [`try_from_bytes`] but will panic on error.
 #[inline]
 #[cfg_attr(feature = "track_caller", track_caller)]
+#[flux::spec(fn (s: &[u8]) -> &T requires T::align_of() != 0)]
 pub fn from_bytes<T: AnyBitPattern>(s: &[u8]) -> &T {
   unsafe { internal::from_bytes(s) }
 }
@@ -312,6 +315,7 @@ pub fn from_bytes<T: AnyBitPattern>(s: &[u8]) -> &T {
 /// This is like [`try_from_bytes_mut`] but will panic on error.
 #[inline]
 #[cfg_attr(feature = "track_caller", track_caller)]
+#[flux::spec(fn (s: &mut [u8]) -> &mut T requires T::align_of() != 0)]
 pub fn from_bytes_mut<T: NoUninit + AnyBitPattern>(s: &mut [u8]) -> &mut T {
   unsafe { internal::from_bytes_mut(s) }
 }
@@ -350,6 +354,7 @@ pub fn pod_read_unaligned<T: AnyBitPattern>(bytes: &[u8]) -> T {
 /// * If the slice isn't aligned for the new type
 /// * If the slice's length isn’t exactly the size of the new type
 #[inline]
+#[flux::spec(fn (s: &[u8]) -> Result<&T, PodCastError> requires T::align_of() != 0)]
 pub fn try_from_bytes<T: AnyBitPattern>(s: &[u8]) -> Result<&T, PodCastError> {
   unsafe { internal::try_from_bytes(s) }
 }
@@ -361,6 +366,7 @@ pub fn try_from_bytes<T: AnyBitPattern>(s: &[u8]) -> Result<&T, PodCastError> {
 /// * If the slice isn't aligned for the new type
 /// * If the slice's length isn’t exactly the size of the new type
 #[inline]
+#[flux::spec(fn (s: &mut [u8]) -> Result<&mut T, PodCastError> requires T::align_of() != 0)]
 pub fn try_from_bytes_mut<T: NoUninit + AnyBitPattern>(
   s: &mut [u8],
 ) -> Result<&mut T, PodCastError> {
@@ -398,6 +404,7 @@ pub fn cast_mut<A: NoUninit + AnyBitPattern, B: NoUninit + AnyBitPattern>(
 /// This is [`try_cast_ref`] but will panic on error.
 #[inline]
 #[cfg_attr(feature = "track_caller", track_caller)]
+#[flux::spec(fn (a: &A) -> &B requires A::align_of() != 0 && B::align_of() != 0)]
 pub fn cast_ref<A: NoUninit, B: AnyBitPattern>(a: &A) -> &B {
   unsafe { internal::cast_ref(a) }
 }
@@ -474,6 +481,7 @@ pub fn try_cast<A: NoUninit, B: AnyBitPattern>(
 /// * If the reference isn't aligned in the new type
 /// * If the source type and target type aren't the same size.
 #[inline]
+#[flux::spec(fn (a: &A) -> Result<&B, PodCastError> requires A::align_of() != 0 && B::align_of() != 0)]
 pub fn try_cast_ref<A: NoUninit, B: AnyBitPattern>(
   a: &A,
 ) -> Result<&B, PodCastError> {
@@ -540,6 +548,7 @@ pub fn write_zeroes<T: Zeroable>(target: &mut T) {
   struct EnsureZeroWrite<T>(*mut T);
   impl<T> Drop for EnsureZeroWrite<T> {
     #[inline(always)]
+    #[flux::trusted]
     fn drop(&mut self) {
       unsafe {
         core::ptr::write_bytes(self.0, 0u8, 1);
@@ -561,6 +570,7 @@ pub fn write_zeroes<T: Zeroable>(target: &mut T) {
 /// See also [`write_zeroes`], which zeroes all bytes of a single value rather
 /// than a slice.
 #[inline]
+#[flux::spec(fn (slice: &mut [T][@n]) requires T::size_of() >= 0)]
 pub fn fill_zeroes<T: Zeroable>(slice: &mut [T]) {
   if core::mem::needs_drop::<T>() {
     // If `T` needs to be dropped then we have to do this one item at a time, in

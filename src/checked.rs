@@ -250,6 +250,7 @@ impl From<crate::PodCastError> for CheckedCastError {
 /// * If the slice's length isn’t exactly the size of the new type
 /// * If the slice contains an invalid bit pattern for `T`
 #[inline]
+#[flux::spec(fn (s: &[u8]) -> Result<&T, CheckedCastError> requires <T::Bits as Sized>::align_of() != 0)]
 pub fn try_from_bytes<T: CheckedBitPattern>(
   s: &[u8],
 ) -> Result<&T, CheckedCastError> {
@@ -270,6 +271,7 @@ pub fn try_from_bytes<T: CheckedBitPattern>(
 /// * If the slice's length isn’t exactly the size of the new type
 /// * If the slice contains an invalid bit pattern for `T`
 #[inline]
+#[flux::spec(fn (s: &mut [u8]) -> Result<&mut T, CheckedCastError> requires <T::Bits as Sized>::align_of() != 0)]
 pub fn try_from_bytes_mut<T: CheckedBitPattern + NoUninit>(
   s: &mut [u8],
 ) -> Result<&mut T, CheckedCastError> {
@@ -332,6 +334,7 @@ pub fn try_cast<A: NoUninit, B: CheckedBitPattern>(
 /// * If the source type and target type aren't the same size.
 /// * If `a` contains an invalid bit pattern for `B` this fails.
 #[inline]
+#[flux::spec(fn (a: &A) -> Result<&B, CheckedCastError> requires A::align_of() != 0 && <B::Bits as Sized>::align_of() != 0)]
 pub fn try_cast_ref<A: NoUninit, B: CheckedBitPattern>(
   a: &A,
 ) -> Result<&B, CheckedCastError> {
@@ -422,6 +425,7 @@ pub fn try_cast_slice_mut<
 /// This is [`try_from_bytes`] but will panic on error.
 #[inline]
 #[cfg_attr(feature = "track_caller", track_caller)]
+#[flux::spec(fn (s: &[u8]) -> &T requires <T::Bits as Sized>::align_of() != 0)]
 pub fn from_bytes<T: CheckedBitPattern>(s: &[u8]) -> &T {
   match try_from_bytes(s) {
     Ok(t) => t,
@@ -436,6 +440,7 @@ pub fn from_bytes<T: CheckedBitPattern>(s: &[u8]) -> &T {
 /// This is [`try_from_bytes_mut`] but will panic on error.
 #[inline]
 #[cfg_attr(feature = "track_caller", track_caller)]
+#[flux::spec(fn (s: &mut [u8]) -> &mut T requires <T::Bits as Sized>::align_of() != 0)]
 pub fn from_bytes_mut<T: NoUninit + CheckedBitPattern>(s: &mut [u8]) -> &mut T {
   match try_from_bytes_mut(s) {
     Ok(t) => t,
@@ -496,6 +501,7 @@ pub fn cast_mut<
 /// This is [`try_cast_ref`] but will panic on error.
 #[inline]
 #[cfg_attr(feature = "track_caller", track_caller)]
+#[flux::spec(fn (a: &A) -> &B requires A::align_of() != 0 && <B::Bits as Sized>::align_of() != 0)]
 pub fn cast_ref<A: NoUninit, B: CheckedBitPattern>(a: &A) -> &B {
   match try_cast_ref(a) {
     Ok(t) => t,
