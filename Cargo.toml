@@ -109,6 +109,8 @@ nightly_docs = []
 [dependencies]
 bytemuck_derive = { version = "1.10.2", path = "derive", optional = true }
 rustversion = { version = "1.0.22", optional = true }
+flux-rs = { git = "https://github.com/flux-rs/flux.git" }
+flux-core = { git = "https://github.com/flux-rs/flux.git" }
 
 [lints.rust]
 unexpected_cfgs = { level = "deny", check-cfg = [
@@ -127,3 +129,6 @@ features = [
 [package.metadata.playground]
 # Note(Lokathor): Don't use all-features or it would use `unsound_ptr_pod_impl` too.
 features = ["latest_stable_rust", "extern_crate_alloc", "extern_crate_std"]
+
+[package.metadata.flux]
+enabled = true

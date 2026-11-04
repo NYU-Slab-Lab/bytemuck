@@ -141,6 +141,7 @@ pub unsafe trait TransparentWrapper<Inner: ?Sized> {
   /// Convert a reference to the inner type into a reference to the wrapper
   /// type.
   #[inline]
+  #[flux::trusted] 
   fn wrap_ref(s: &Inner) -> &Self {
     // The unsafe contract requires that these two have
     // identical representations, and thus identical pointer metadata.
@@ -164,6 +165,7 @@ pub unsafe trait TransparentWrapper<Inner: ?Sized> {
   /// Convert a mutable reference to the inner type into a mutable reference to
   /// the wrapper type.
   #[inline]
+  #[flux::trusted] 
   fn wrap_mut(s: &mut Inner) -> &mut Self {
     // The unsafe contract requires that these two have
     // identical representations, and thus identical pointer metadata.
@@ -231,6 +233,7 @@ pub unsafe trait TransparentWrapper<Inner: ?Sized> {
   /// Convert a reference to the wrapper type into a reference to the inner
   /// type.
   #[inline]
+  #[flux::trusted]
   fn peel_ref(s: &Self) -> &Inner {
     // The unsafe contract requires that these two have
     // identical representations, and thus identical pointer metadata.
@@ -253,6 +256,7 @@ pub unsafe trait TransparentWrapper<Inner: ?Sized> {
   /// Convert a mutable reference to the wrapper type into a mutable reference
   /// to the inner type.
   #[inline]
+  #[flux::trusted]
   fn peel_mut(s: &mut Self) -> &mut Inner {
     // The unsafe contract requires that these two have
     // identical representations, and thus identical pointer metadata.

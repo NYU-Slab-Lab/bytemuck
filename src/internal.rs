@@ -77,6 +77,7 @@ pub(crate) unsafe fn bytes_of_mut<T: Copy>(t: &mut T) -> &mut [u8] {
 /// This is [`try_from_bytes`] but will panic on error.
 #[inline]
 #[cfg_attr(feature = "track_caller", track_caller)]
+#[flux::spec(fn (s: &[u8]) -> &T requires T::align_of() != 0)]
 pub(crate) unsafe fn from_bytes<T: Copy>(s: &[u8]) -> &T {
   match try_from_bytes(s) {
     Ok(t) => t,
@@ -91,6 +92,7 @@ pub(crate) unsafe fn from_bytes<T: Copy>(s: &[u8]) -> &T {
 /// This is [`try_from_bytes_mut`] but will panic on error.
 #[inline]
 #[cfg_attr(feature = "track_caller", track_caller)]
+#[flux::spec(fn (s: &mut [u8]) -> &mut T requires T::align_of() != 0)]
 pub(crate) unsafe fn from_bytes_mut<T: Copy>(s: &mut [u8]) -> &mut T {
   match try_from_bytes_mut(s) {
     Ok(t) => t,
@@ -132,6 +134,7 @@ pub(crate) unsafe fn pod_read_unaligned<T: Copy>(bytes: &[u8]) -> T {
 /// * If `align` is not a power of two. This includes when `align` is zero.
 #[inline]
 #[cfg_attr(feature = "track_caller", track_caller)]
+#[flux::spec(fn (ptr: *const (), align: usize{x: x != 0}) -> bool)]
 pub(crate) fn is_aligned_to(ptr: *const (), align: usize) -> bool {
   #[cfg(feature = "align_offset")]
   {
@@ -154,6 +157,7 @@ pub(crate) fn is_aligned_to(ptr: *const (), align: usize) -> bool {
 /// * If the slice isn't aligned for the new type
 /// * If the slice's length isn’t exactly the size of the new type
 #[inline]
+#[flux::spec(fn (s: &[u8]) -> Result<&T, PodCastError> requires T::align_of() != 0)]
 pub(crate) unsafe fn try_from_bytes<T: Copy>(
   s: &[u8],
 ) -> Result<&T, PodCastError> {
@@ -173,6 +177,7 @@ pub(crate) unsafe fn try_from_bytes<T: Copy>(
 /// * If the slice isn't aligned for the new type
 /// * If the slice's length isn’t exactly the size of the new type
 #[inline]
+#[flux::spec(fn (s: &mut [u8]) -> Result<&mut T, PodCastError> requires T::align_of() != 0)]
 pub(crate) unsafe fn try_from_bytes_mut<T: Copy>(
   s: &mut [u8],
 ) -> Result<&mut T, PodCastError> {
@@ -229,6 +234,7 @@ pub(crate) unsafe fn cast_mut<A: Copy, B: Copy>(a: &mut A) -> &mut B {
 /// This is [`try_cast_ref`] but will panic on error.
 #[inline]
 #[cfg_attr(feature = "track_caller", track_caller)]
+#[flux::spec(fn (a: &A) -> &B requires A::align_of() != 0 && B::align_of() != 0)]
 pub(crate) unsafe fn cast_ref<A: Copy, B: Copy>(a: &A) -> &B {
   if size_of::<A>() == size_of::<B>() && align_of::<A>() >= align_of::<B>() {
     // Plz mr compiler, just notice that we can't ever hit Err in this case.
@@ -300,6 +306,7 @@ pub(crate) unsafe fn try_cast<A: Copy, B: Copy>(
 /// * If the reference isn't aligned in the new type
 /// * If the source type and target type aren't the same size.
 #[inline]
+#[flux::spec(fn (a: &A) -> Result<&B, PodCastError> requires A::align_of() != 0 && B::align_of() != 0)]
 pub(crate) unsafe fn try_cast_ref<A: Copy, B: Copy>(
   a: &A,
 ) -> Result<&B, PodCastError> {
